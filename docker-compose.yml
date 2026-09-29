@@ -1,0 +1,33 @@
+# Lomax SA - compose local (FLOCI provee S3/Dynamo/Lambda en http://host.docker.internal:4566)
+# RDS: usa postgres local para desarrollo; en FLOCI se usa el endpoint del create-db-instance.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: lomax
+    ports: ["5433:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+  backend:
+    build: ./backend
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/lomax
+      AWS_ENDPOINT_URL: http://host.docker.internal:4566
+      AWS_REGION: us-east-1
+      DYNAMODB_TABLE: lomax-productos-dev
+      S3_BUCKET_ORIGINALES: lomax-originales
+      S3_BUCKET_MINIATURAS: lomax-miniaturas
+      LAMBDA_FUNCTION: lomax-thumbnail
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on: [postgres]
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+  proxy:
+    build: ./proxy
+    ports: ["8080:80"]
+    depends_on: [backend, frontend]
+volumes:
+  pgdata:
