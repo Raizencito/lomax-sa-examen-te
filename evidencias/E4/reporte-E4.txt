@@ -1,4 +1,4 @@
-POST valido: 201 PENDIENTE pid= 23
+reutiliza pid= 23
 POST imagen: 200 PUBLICADO
 GET imagen: 200 image/jpeg 658
 GET categorias: 3
